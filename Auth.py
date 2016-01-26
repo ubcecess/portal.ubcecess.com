@@ -1,9 +1,18 @@
 from flask import Flask, redirect, url_for, session, request, jsonify
 from flask_oauthlib.client import OAuth
 import config
+import sqlite3
+import json
+
+
+from werkzeug.debug import DebuggedApplication
+
 
 
 app = Flask(__name__)
+
+dapp = DebuggedApplication(app, evalex=True) 
+
 app.config.from_object('config')
 oauth = OAuth(app)
 
@@ -28,7 +37,10 @@ google = oauth.remote_app(
 def index():
     if 'google_token' in session:
         me = google.get('userinfo')
-        return jsonify({"data": me.data})
+        # return jsonify({"data": me.data})
+        data = json.loads(me.__dict__['raw_data'])
+        return data['email']
+       
     return redirect(url_for('login'))
 
 
@@ -53,8 +65,12 @@ def authorized():
         )
     session['google_token'] = (resp['access_token'], '')
     me = google.get('userinfo')
-    return jsonify({"data": me.data})
-
+    #return jsonify({"data": me.data})
+    conn = sqlite3.connect('Users.db')
+    c = conn.cursor()
+    emails = c.execute("SELECT EmailAddress FROM userinfo")
+    data = json.loads(me.__dict__['raw_data'])
+    return data['email']
 
 @google.tokengetter
 def get_google_oauth_token():
