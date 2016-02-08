@@ -1,21 +1,19 @@
-from flask import Flask, redirect, url_for, session, request, jsonify
+from flask import Flask, session, redirect, url_for, request, render_template
 from flask_oauthlib.client import OAuth
-import config
-import sqlite3
-import json
-
-
-from werkzeug.debug import DebuggedApplication
-
-
+from pony.orm import *
+import json 
 
 app = Flask(__name__)
 
-dapp = DebuggedApplication(app, evalex=True) 
+# Configuration
+# config should contain:
+#   GOOGLE_ID
+#   GOOGLE_SECRET
+#   DEBUG = (T/F)
+#   SECRET_KEY
 
 app.config.from_object('config')
 oauth = OAuth(app)
-
 google = oauth.remote_app(
     'google',
     consumer_key=app.config.get('GOOGLE_ID'),
@@ -23,7 +21,6 @@ google = oauth.remote_app(
     request_token_params={
         'scope': 'email',
         'access_type':'offline'
-
     },
     base_url='https://www.googleapis.com/oauth2/v1/',
     request_token_url=None,
@@ -32,50 +29,52 @@ google = oauth.remote_app(
     authorize_url='https://accounts.google.com/o/oauth2/auth',
 )
 
+db = Database('sqlite', 'testdb', create_db=True)
+
+class Users(db.Entity):
+    name = Required(str)
+    email = Required(str)
+    
+
+db.generate_mapping(create_tables=True)
 
 @app.route('/')
 def index():
-    if 'google_token' in session:
-        me = google.get('userinfo')
-        # return jsonify({"data": me.data})
-        data = json.loads(me.__dict__['raw_data'])
-        return data['email']
-       
-    return redirect(url_for('login'))
+    if session.get('google_token'):
+        userinfo = google.get('userinfo')
+        googleData = json.loads(userinfo.__dict__['raw_data'])
+        with db_session:
+            for email in select(u.email for u in Users)[:]:
+                if  googleData['email'] == email:
+                    return render_template('layout.html', inDB=True)
+            return render_template('layout.html', inDB=False)
+    return render_template('layout.html')
 
-
+      
 @app.route('/login')
 def login():
     return google.authorize(callback=url_for('authorized', _external=True))
-
-
+    
 @app.route('/logout')
 def logout():
     session.pop('google_token', None)
     return redirect(url_for('index'))
-
-
+    
 @app.route('/login/authorized')
 def authorized():
-    resp = google.authorized_response()
-    if resp is None:
-        return 'Access denied: reason=%s error=%s' % (
+    response = google.authorized_response()
+    if response is None:
+        return 'Access Denied: reason is %s error is %s' % (
             request.args['error_reason'],
             request.args['error_description']
         )
-    session['google_token'] = (resp['access_token'], '')
-    me = google.get('userinfo')
-    #return jsonify({"data": me.data})
-    conn = sqlite3.connect('Users.db')
-    c = conn.cursor()
-    emails = c.execute("SELECT EmailAddress FROM userinfo")
-    data = json.loads(me.__dict__['raw_data'])
-    return data['email']
-
+    session['google_token'] = (response['access_token'], '')
+    return redirect(url_for('index'))
+    
 @google.tokengetter
-def get_google_oauth_token():
+def get_google_auth_token():
     return session.get('google_token')
-
-
+    
 if __name__ == '__main__':
     app.run()
+    
