@@ -1,0 +1,17 @@
+<!doctype html>
+<title>Portal</title>
+<body>
+	<h1 id="">UBC ECESS PORTAL</h1>	
+	{%  if not session.google_token %}
+		<a href="{{ url_for('login')}}">Log in</a>
+	{% else %}
+		<a href="{{ url_for('logout')}}">Log out</a>
+		{% if inDB %}
+		<p>You're in da db</p>
+		{% else %}
+		<p>You're not in da db</p>
+		{% endif %}
+	{% endif %}
+		
+	
+</body>
