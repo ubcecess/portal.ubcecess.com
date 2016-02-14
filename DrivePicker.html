@@ -67,12 +67,14 @@
         picker.setVisible(true);
       }
     }
-
+		var id;
+		var type;
     // A simple callback implementation.
     function pickerCallback(data) {
       if (data.action == google.picker.Action.PICKED) {
-        var fileId = data.docs[0];
-        alert('The user selected: ' + fileId);
+        var id = data.docs[0]["id"];
+				var type = data.docs[0]["mimeType"]
+        alert('The user selected: ' + id + " " + type);
       }
     }
     </script>
