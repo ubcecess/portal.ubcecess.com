@@ -106,11 +106,16 @@ header {
   height: 9em;
 }
 
-#calendar {
+iframe {
   margin: auto;
   width: 98%;
   padding: 1%
 }
+
+#todoist iframe {
+  height: 50vh;
+}
+
 
 h3 {
   text-transform: uppercase;
