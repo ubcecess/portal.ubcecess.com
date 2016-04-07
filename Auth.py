@@ -44,11 +44,17 @@ def index():
         userinfo = google.get('userinfo')
         googleData = json.loads(userinfo.__dict__['raw_data'])
         with db_session:
-            for email in select(u.email for u in Users)[:]:
-                if  googleData['email'] == email:
-                    return render_template('layout.html', inDB=True)
-            return render_template('layout.html', inDB=False)
-    return render_template('layout.html')
+            for user in select(user for user in Users):
+                try:
+                    if  googleData['email'] == user.email:
+                        return render_template('index.html', inDB=True, name=user.name)
+                    else:
+                        return render_template('index.html', inDB=False)
+                except KeyError:
+                    return render_template('index.html', inDB=False)
+            return "hello"
+    return render_template('index.html')
+
 
       
 @app.route('/login')
