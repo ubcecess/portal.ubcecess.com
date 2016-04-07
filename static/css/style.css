@@ -48,6 +48,10 @@ html {
   font-size: 1.3em;
 }
 
+body {
+  margin-bottom: 1em;
+}
+
 i.icon {
   color: #474747;
 }
@@ -88,14 +92,31 @@ header {
   margin-top: 5px;
 }
 
-#pinned {
-  width: 80%;
-  max-width: 1000px;
-  height: 9em;
+.box {
   background: #FFFFFF;
   border: 1px solid rgba(66,60,61,0.20);
   box-shadow: 0px 4px 6px 0px rgba(0,0,0,0.10);
   border-radius: 4px;
   margin: auto;
   margin-top: 2.5em;
+  width: 80%;
+  max-width: 1000px;
+}
+#pinned {
+  height: 9em;
+}
+
+#calendar {
+  margin: auto;
+  width: 98%;
+  padding: 1%
+}
+
+h3 {
+  text-transform: uppercase;
+  font-family: Nunito, Helvetica, Arial, sans-serif;
+  color: #b5b5b5;
+  font-weight: bold;
+  font-size: .6em;
+  padding: 1%;
 }
