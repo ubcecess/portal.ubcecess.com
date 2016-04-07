@@ -1,17 +1,26 @@
 <!doctype html>
-<title>Portal</title>
+<head>
+  <title>Portal</title>
+  <link rel="stylesheet" href="static/css/style.css">
+  <link rel="stylesheet" href="static/css/jquery.qtip.min.css">
+</head>
+
+<header>
+  <a href='/'><img src="static/images/logo.png" id='logo'></a>
+  <div id='login'>
+    {%  if not session.google_token %}
+      <span>Hey there, why don't you </span><a href="{{ url_for('login')}}">Log in</a>
+    {% else %}
+      <span>Hi there <span id='name'>{{name}}</span>!</span><a id='logout' href="{{ url_for('logout')}}">Log out</a>
+    {% endif %}
+  </div>
+</header>
+
 <body>
-	<h1 id="">UBC ECESS PORTAL</h1>	
-	{%  if not session.google_token %}
-		<a href="{{ url_for('login')}}">Log in</a>
-	{% else %}
-		<a href="{{ url_for('logout')}}">Log out</a>
-		{% if inDB %}
-		<p>You're in da db</p>
-		{% else %}
-		<p>You're not in da db</p>
-		{% endif %}
-	{% endif %}
-		
-	
+
+  <div id='pinned'>
+  </div>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+  <script src="static/js/jquery.qtip.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="static/js/main.js" type="text/javascript" charset="utf-8"></script>
 </body>

@@ -1,7 +1,8 @@
+#!/usr/local/bin/python
 from flask import Flask, session, redirect, url_for, request, render_template
 from flask_oauthlib.client import OAuth
 from pony.orm import *
-import json 
+import json
 
 app = Flask(__name__)
 
@@ -29,12 +30,21 @@ google = oauth.remote_app(
     authorize_url='https://accounts.google.com/o/oauth2/auth',
 )
 
+# Database + ORM
+
 db = Database('sqlite', 'testdb', create_db=True)
 
 class Users(db.Entity):
     name = Required(str)
     email = Required(str)
-    
+    role = Required(str)
+
+'''
+class Docs(db.Entity):
+    name = Required(str)
+    url = Required(str)
+    kind = Required(str)
+'''
 
 db.generate_mapping(create_tables=True)
 
@@ -56,16 +66,15 @@ def index():
     return render_template('index.html')
 
 
-      
 @app.route('/login')
 def login():
     return google.authorize(callback=url_for('authorized', _external=True))
-    
+
 @app.route('/logout')
 def logout():
     session.pop('google_token', None)
     return redirect(url_for('index'))
-    
+
 @app.route('/login/authorized')
 def authorized():
     response = google.authorized_response()
@@ -76,11 +85,11 @@ def authorized():
         )
     session['google_token'] = (response['access_token'], '')
     return redirect(url_for('index'))
-    
+
 @google.tokengetter
 def get_google_auth_token():
     return session.get('google_token')
-    
+
 if __name__ == '__main__':
     app.run()
-    
+
