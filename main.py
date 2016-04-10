@@ -68,6 +68,9 @@ def index():
         return render_template('index.html', logged_in='true', name=session.get('userinfo').get('name'))        
     return render_template('index.html', logged_in='false')
 
+@app.route('/drive')
+def drive():
+    return render_template('drive.html')
 
 @app.route('/login')
 def login():
