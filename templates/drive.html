@@ -10,10 +10,11 @@
     // Replace with your own Browser API key, or your own key.
 
     // The Client ID obtained from the Google Developers Console. Replace with your own Client ID.
-    var clientId = "35320362929-ic0euuliveq6lspg1dvrjjcbbi4o0mp0.apps.googleusercontent.com"
+    var clientId = "{{ client_id }}"
 
     // Replace with your own App ID. (Its the first number in your Client ID)
-    var appId = "35320362929";
+    var re = /[0-9]{11}/
+    var appId = clientId.match(re);
 
     // Scope to use to access user's Drive items.
     var scope = ['https://www.googleapis.com/auth/drive'];
@@ -53,13 +54,13 @@
     function createPicker() {
       if (pickerApiLoaded && oauthToken) {
         var view = new google.picker.DocsView();
-				view.setIncludeFolders(true);
-				view.setQuery("ECESS Internal")
+        view.setIncludeFolders(true);
+        view.setQuery("ECESS Internal")
         var picker = new google.picker.PickerBuilder()
             .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
             .setAppId(appId)
             .setOAuthToken(oauthToken)
-						.addView(view)
+            .addView(view)
             .addView(new google.picker.DocsUploadView())
             //.setDeveloperKey(developerKey)
             .setCallback(pickerCallback)
@@ -67,13 +68,13 @@
         picker.setVisible(true);
       }
     }
-		var id;
-		var type;
+    var id;
+    var type;
     // A simple callback implementation.
     function pickerCallback(data) {
       if (data.action == google.picker.Action.PICKED) {
         var id = data.docs[0]["id"];
-				var type = data.docs[0]["mimeType"]
+        var type = data.docs[0]["mimeType"]
         alert('The user selected: ' + id + " " + type);
       }
     }
