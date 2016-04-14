@@ -46,10 +46,13 @@ table {
 html {
   background: #F5F5F5;
   font-size: 1.3em;
+  font-family: Nunito;
 }
 
 body {
   margin-bottom: 1em;
+  width: 80%;
+  margin: auto;
 }
 
 i.icon {
@@ -99,7 +102,6 @@ header {
   border-radius: 4px;
   margin: auto;
   margin-top: 2.5em;
-  width: 80%;
   max-width: 1000px;
 }
 #pinned {
@@ -114,6 +116,17 @@ iframe {
 
 #todoist iframe {
   height: 50vh;
+}
+
+#form {
+  max-width: 500px;
+}
+
+#register_form {
+  padding: 1em;
+  font-weight: 100;
+  font-size: .8em;
+  line-height: 1.3em;
 }
 
 

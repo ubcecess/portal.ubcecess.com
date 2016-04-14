@@ -1,0 +1,46 @@
+<!doctype html>
+<head>
+  <title>Portal</title>
+  <link rel="stylesheet" href="static/css/style.css">
+  <link rel="stylesheet" href="static/css/jquery.qtip.min.css">
+</head>
+
+<header>
+  <a href='/'><img src="static/images/logo.png" id='logo'></a>
+  <div id='login'>
+    {%  if logged_in == 'true' %}
+      <span>Hi there <span id='name'>{{name}}</span>!</span><a id='logout' href="{{ url_for('logout')}}">Log out</a>
+    {% endif %}
+  </div>
+</header>
+
+<body>
+  <div class='box' id='form'>
+    <h3>Registration</h3>
+    <form class="form" id="register_form" method="post" action="register">
+      <fieldset>
+        <p>
+          <label for="cname">Name</label>
+          <br>
+          <input id="cname" name="name" minlength="2" type="text" required>
+        </p>
+        <p>
+          <label for="cemail">E-Mail</label>
+          <br>
+          <input id="cemail" type="email" name="email" required>
+        </p>
+        <p>
+          <input class="submit" type="submit" value="Submit">
+        </p>
+      </fieldset>
+    </form>
+
+  </div>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+  <script src="static/js/jquery.qtip.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="static/js/jquery.validate.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="static/js/main.js" type="text/javascript" charset="utf-8"></script>
+  <script type="text/javascript" charset="utf-8">
+    $('#register_form').validate();
+  </script>
+</body>
