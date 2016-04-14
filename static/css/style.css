@@ -129,6 +129,17 @@ iframe {
   line-height: 1.3em;
 }
 
+fieldset > p {
+  margin-top: .5em;
+}
+
+label.error {
+  color: #c00409;
+  text-transform:uppercase;
+  padding-left: 1em;
+  font-size: .7em;
+}
+
 
 h3 {
   text-transform: uppercase;
@@ -137,4 +148,31 @@ h3 {
   font-weight: bold;
   font-size: .6em;
   padding: 1%;
+}
+
+.user, .email, .role {
+  display: inline-block;
+}
+
+.user {
+  width: 150px;
+}
+
+ul {
+  padding: .5em;
+}
+
+li.header {
+  margin-bottom: .5em;
+  font-weight: 400;
+}
+
+li {
+  margin-top: .2em;
+  font-weight: 100;
+}
+
+
+.email {
+  width: 300px;
 }

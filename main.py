@@ -63,17 +63,51 @@ db.generate_mapping(create_tables=True)
 
 @app.route('/')
 def index():
-    if session.get('userinfo'):
-        return render_template('index.html', logged_in='true', name=session.get('userinfo').get('name'))        
+    if session.get('logged_in'):
+        return render_template('index.html', logged_in='true', name=session.get('name'))
     return render_template('index.html', logged_in='false')
 
 @app.route('/drive')
 def drive():
     return render_template('drive.html', client_id=info['consumer_key'])
 
-@app.route('/register')
+@app.route('/register', methods=['GET', 'POST'])
 def register():
-    return render_template('register.html')
+    name = session.get('name','')
+    email = session.get('email','')
+
+    if request.method == 'POST':
+        name = request.form['name']
+        email = request.form['email']
+        with db_session:
+            newuser = Users(name=name,email=email,role='unconfirmed' )
+        return "registered"
+
+    session.clear()
+    return render_template('register.html', name = name,email = email)
+
+@app.route('/confirm', methods=['GET', 'POST'])
+def confirm():
+    if request.method == 'POST':
+        if session.get('email'):
+            with db_session:
+                if get(u.role for u in Users if u.email == \
+                        session.get('email')) == 'Admin':
+                    user_id = request.form['id']
+                    param = request.form['param']
+                    val = request.form['val']
+                    update = {param: val}
+                    Users[user_id].set(**update)
+
+                    return "done"
+    if session.get('email'):
+        with db_session:
+            if get(u.role for u in Users if u.email == \
+                    session.get('email')) == 'Admin':
+                users =  Users.select()[:]
+                return render_template('confirm.html', users=users)
+
+
 
 @app.route('/login')
 def login():
@@ -81,8 +115,7 @@ def login():
 
 @app.route('/logout')
 def logout():
-    session.pop('google_token', None)
-    session.pop('userinfo', None)
+    session.clear()
     return redirect(url_for('index'))
 
 @app.route('/login/authorized')
@@ -93,19 +126,27 @@ def authorized(response):
             request.args['error_reason'],
             request.args['error_description']
         )
-        
+
     session['google_token'] = (response['access_token'],)
-    google_userinfo = google.get('userinfo').data
-    
+    google_info = google.get('userinfo').data
+
     with db_session:
-        if exists(user for user in Users if user.email == google_userinfo.get('email')):
-            session['userinfo'] = google_userinfo
+        if exists(user for user in Users if user.email == google_info.get('email')):
+            user = get(u for u in Users if u.email== google_info.get('email'))
+
+            if user.role == 'unconfirmed':
+                return "You'll need to get confirmed from an admin"
+            session['google_token'] = (response['access_token'],)
+            session['logged_in'] = True
+            session['name'] = user.name
+            session['email'] = user.email
             session.permanent = True
             return redirect(url_for('index'))
         else:
+            session['name'] = google_info.get('name')
+            session['email'] = google_info.get('email')
             session.pop('google_token', None)
-            return "Sorry, you'll need to register"
-            
+            return redirect(url_for('register'))
 
 @google.tokengetter
 def get_google_auth_token():
@@ -113,4 +154,3 @@ def get_google_auth_token():
 
 if __name__ == '__main__':
     app.run(debug=True)
-

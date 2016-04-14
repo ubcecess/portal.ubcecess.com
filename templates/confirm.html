@@ -1,0 +1,69 @@
+<!doctype html>
+<head>
+  <title>Portal</title>
+  <link rel="stylesheet" href="static/css/style.css">
+  <link rel="stylesheet" href="static/css/jquery.qtip.min.css">
+</head>
+
+<header>
+  <a href='/'><img src="static/images/logo.png" id='logo'></a>
+  <div id='login'>
+    {%  if logged_in == 'true' %}
+      <span>Hi there <span id='name'>{{name}}</span>!</span><a id='logout' href="{{ url_for('logout')}}">Log out</a>
+    {% endif %}
+  </div>
+</header>
+
+<body>
+  <div class='box' id='userlist'>
+    <h3>Users</h3>
+    <style type="text/css" media="all">
+      .users.li {
+        display:block;
+      }
+    </style>
+    <ul>
+      <li class='header'>
+        <span class='user'>User</span>
+        <span class='email'>Email</span>
+        <span class='role'>Role</span>
+      </li>
+      {% for u in users %}
+      <li id="{{u.id}}">
+          <span class='user'>{{u.name}}</span>
+          <span class='email'>{{u.email}}</span>
+          <span class='role'>{{u.role}}</span>
+        </li>
+      {% endfor %}
+    </ul>
+
+  </div>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+  <script src="static/js/jquery.qtip.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="static/js/main.js" type="text/javascript" charset="utf-8"></script>
+  <script type="text/javascript" charset="utf-8">
+    $('.user, .email, .role').click(function() {
+      $(this).after("<input type='text' value='" + this.innerHTML +
+          "' class='" + $(this).attr("class") + "'>");
+      $(this).hide();
+      $(this).next().focus();
+      $.post("confirm", {id:$(this).parent().attr("id")})
+
+      $(this).next().focusout(function() {
+        $(this).prev().html(this.value);
+        $(this).prev().show();
+        $.ajax({
+          url: 'confirm',
+          type: 'POST',
+          data: {
+            id: $(this).parent().attr("id"),
+            param: $(this).attr("class"),
+            val: this.value
+          }
+        });
+        $(this).remove();
+      });
+    });
+
+  </script>
+</body>
