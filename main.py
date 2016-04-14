@@ -12,17 +12,16 @@ app = Flask(__name__)
 # infoo.json should contain:
 #   GOOGLE_ID
 #   GOOGLE_SECRET
-#   DEBUG = (T/F)
 #   SECRET_KEY
 
 if not os.path.isfile('info.json'):
     print "Please provide the following information. This will be saved in info.json \
     and used for future requests"
-    
+
     infoIn = {'consumer_key' : raw_input("Google Consumer Key: "), \
             'consumer_secret' : raw_input("Google Consumer Key: "), \
             'secret_key' : raw_input("App Secret Key: ")}
-            
+
     with open('info.json', 'w') as outfile:
         json.dump(infoIn, outfile)
 
@@ -70,7 +69,11 @@ def index():
 
 @app.route('/drive')
 def drive():
-    return render_template('drive.html')
+    return render_template('drive.html', client_id=info['consumer_key'])
+
+@app.route('/register')
+def register():
+    return render_template('register.html')
 
 @app.route('/login')
 def login():
