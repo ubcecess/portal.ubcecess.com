@@ -2,64 +2,17 @@
 from flask import Flask, session, redirect, url_for, request, render_template
 from flask_oauthlib.client import OAuth
 from pony.orm import *
-import json
-import os.path
 
+# App Specific Modules
+from config import *
+from oauth import *
+from db import *
 
 app = Flask(__name__)
 
-# Configuration
-# infoo.json should contain:
-#   GOOGLE_ID
-#   GOOGLE_SECRET
-#   SECRET_KEY
-
-if not os.path.isfile('info.json'):
-    print "Please provide the following information. This will be saved in info.json \
-    and used for future requests"
-
-    infoIn = {'consumer_key' : raw_input("Google Consumer Key: "), \
-            'consumer_secret' : raw_input("Google Consumer Key: "), \
-            'secret_key' : raw_input("App Secret Key: ")}
-
-    with open('info.json', 'w') as outfile:
-        json.dump(infoIn, outfile)
-
-with open('info.json', 'r') as infile:
-    global info
-    info = json.load(infile)
-
-# Setup Oauth for Google
-
-oauth = OAuth(app)
-google = oauth.remote_app(
-    'google',
-    consumer_key=info['consumer_key'],
-    consumer_secret=info['consumer_secret'],
-    request_token_params={
-        'scope': 'email',
-        'access_type':'offline'
-    },
-    base_url='https://www.googleapis.com/oauth2/v1/',
-    request_token_url=None,
-    access_token_method='POST',
-    access_token_url='https://accounts.google.com/o/oauth2/token',
-    authorize_url='https://accounts.google.com/o/oauth2/auth',
-)
-
-# Provide app a secret key for sessions module
+# For sessions module
 app.secret_key = info['secret_key']
 
-# Database + ORM
-
-db = Database('sqlite', 'testdb', create_db=True)
-
-class Users(db.Entity):
-    name = Required(str)
-    email = Required(str)
-    role = Required(str)
-
-db.generate_mapping(create_tables=True)
 
 @app.route('/')
 def index():
@@ -69,7 +22,8 @@ def index():
 
 @app.route('/drive')
 def drive():
-    return render_template('drive.html', client_id=info['consumer_key'])
+    docs =  Docs.select()[:]
+    return render_template('drive.html', client_id= info['consumer_key'])
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -80,7 +34,7 @@ def register():
         name = request.form['name']
         email = request.form['email']
         with db_session:
-            newuser = Users(name=name,email=email,role='unconfirmed' )
+            newuser = Users(name=name,email=email,group='unconfirmed' )
         return "registered"
 
     session.clear()
@@ -91,7 +45,7 @@ def confirm():
     if request.method == 'POST':
         if session.get('email'):
             with db_session:
-                if get(u.role for u in Users if u.email == \
+                if get(u.group for u in Users if u.email == \
                         session.get('email')) == 'Admin':
                     user_id = request.form['id']
                     param = request.form['param']
@@ -102,7 +56,7 @@ def confirm():
                     return "done"
     if session.get('email'):
         with db_session:
-            if get(u.role for u in Users if u.email == \
+            if get(u.group for u in Users if u.email == \
                     session.get('email')) == 'Admin':
                 users =  Users.select()[:]
                 return render_template('confirm.html', users=users)
@@ -134,7 +88,7 @@ def authorized(response):
         if exists(user for user in Users if user.email == google_info.get('email')):
             user = get(u for u in Users if u.email== google_info.get('email'))
 
-            if user.role == 'unconfirmed':
+            if user.group == 'unconfirmed':
                 return "You'll need to get confirmed from an admin"
             session['google_token'] = (response['access_token'],)
             session['logged_in'] = True
